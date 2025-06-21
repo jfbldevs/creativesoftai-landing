@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://jfbldevs.github.io/creativesoftai-landing/sitemap.xml
+Sitemap: https://creativesoftai.com/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1
