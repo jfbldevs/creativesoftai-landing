@@ -204,15 +204,21 @@ function initButtonInteractions() {
 
 // Contact Form Handling
 function initContactForms() {
-    // Modern button selectors
-    const demoButtons = document.querySelectorAll('button');
+    // Seleccionar todos los botones y enlaces que deberían abrir el formulario
+    const contactTriggers = document.querySelectorAll('button, a');
     
-    demoButtons.forEach(button => {
-        const buttonText = button.textContent.trim();
-        if (buttonText.includes('Solicitar Demo') || 
-            buttonText.includes('Agendar Reunión') || 
-            buttonText.includes('Explore projects')) {
-            button.addEventListener('click', function() {
+    contactTriggers.forEach(trigger => {
+        const text = trigger.textContent.trim().toLowerCase();
+        if (text.includes('contact') || 
+            text.includes('contact us') || 
+            text.includes('let\'s talk') || 
+            text.includes('get in touch') ||
+            text.includes('solicitar demo') || 
+            text.includes('agendar reunión') || 
+            text.includes('explore projects')) {
+            
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
                 showContactModal();
             });
         }
@@ -231,8 +237,16 @@ function initContactForms() {
     });
 }
 
-// Contact Modal (Simple implementation)
+// Contact Modal Implementation
 function showContactModal() {
+    console.log('Opening contact modal...');
+    
+    // Remove existing modal if any
+    const existingModal = document.querySelector('.fixed.inset-0');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
     // Create enhanced modal with premium design
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 opacity-0 transition-all duration-300';
@@ -293,54 +307,59 @@ function showContactModal() {
     // Animate in
     requestAnimationFrame(() => {
         modal.style.opacity = '1';
-        modal.querySelector('.bg-white').style.transform = 'scale(1)';
+        const modalContent = modal.querySelector('.bg-white');
+        if (modalContent) {
+            modalContent.style.transform = 'scale(1)';
+        }
     });
     
     // Handle form submission
     const form = modal.querySelector('#contact-form');
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const button = form.querySelector('button[type="submit"]');
-        const originalText = button.textContent;
-        button.textContent = 'Sending...';
-        button.disabled = true;
-        
-        // Get form data
-        const formData = new FormData(form);
-        
-        // Send to Formspree with better error handling
-        fetch('https://formspree.io/f/mrgrlpqn', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            console.log('Response headers:', Object.fromEntries([...response.headers]));
-            if (response.ok) {
-                return response.json();
-            } else {
-                return response.json().then(err => {
-                    console.error('Server error response:', err);
-                    throw err;
-                });
-            }
-        })
-        .then(data => {
-            console.log('Success:', data);
-            closeContactModal();
-            showSuccessMessage();
-        })
-        .catch(error => {
-            console.error('Error details:', error);
-            showErrorMessage();
-            button.textContent = originalText;
-            button.disabled = false;
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button.textContent;
+            button.textContent = 'Sending...';
+            button.disabled = true;
+            
+            // Get form data
+            const formData = new FormData(form);
+            
+            // Send to Formspree with better error handling
+            fetch('https://formspree.io/f/mrgrlpqn', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries([...response.headers]));
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.json().then(err => {
+                        console.error('Server error response:', err);
+                        throw err;
+                    });
+                }
+            })
+            .then(data => {
+                console.log('Success:', data);
+                closeContactModal();
+                showSuccessMessage();
+            })
+            .catch(error => {
+                console.error('Error details:', error);
+                showErrorMessage();
+                button.textContent = originalText;
+                button.disabled = false;
+            });
         });
-    });
+    }
     
     // Close on backdrop click
     modal.addEventListener('click', function(e) {
@@ -349,10 +368,22 @@ function showContactModal() {
         }
     });
     
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeContactModal();
+        }
+    });
+    
     // Focus first input
     setTimeout(() => {
-        modal.querySelector('input').focus();
+        const firstInput = modal.querySelector('input[name="name"]');
+        if (firstInput) {
+            firstInput.focus();
+        }
     }, 300);
+    
+    console.log('Contact modal opened successfully');
 }
 
 function closeContactModal() {
