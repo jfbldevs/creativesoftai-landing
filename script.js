@@ -310,7 +310,7 @@ function showContactModal() {
         const formData = new FormData(form);
         
         // Send to Formspree with better error handling
-        fetch('https://formspree.io/f/xldnwkpr', {
+        fetch('https://formspree.io/f/mrgrlpqn', {
             method: 'POST',
             body: formData,
             headers: {
@@ -319,10 +319,14 @@ function showContactModal() {
         })
         .then(response => {
             console.log('Response status:', response.status);
+            console.log('Response headers:', Object.fromEntries([...response.headers]));
             if (response.ok) {
                 return response.json();
             } else {
-                return response.json().then(err => Promise.reject(err));
+                return response.json().then(err => {
+                    console.error('Server error response:', err);
+                    throw err;
+                });
             }
         })
         .then(data => {
@@ -391,19 +395,31 @@ function showSuccessMessage() {
 
 function showErrorMessage() {
     const toast = document.createElement('div');
-    toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform';
-    toast.textContent = 'Error sending message. Please try again.';
+    toast.className = 'fixed top-6 right-6 bg-white border border-red-200 text-slate-900 px-6 py-4 rounded-2xl shadow-2xl z-50 transform translate-x-full transition-all duration-300';
+    toast.innerHTML = `
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            <div>
+                <div class="font-medium text-sm">Error sending message</div>
+                <div class="text-slate-600 text-xs">Please check your connection and try again. If the problem persists, you can email us directly.</div>
+            </div>
+        </div>
+    `;
     
     document.body.appendChild(toast);
     
     setTimeout(() => {
-        toast.classList.remove('translate-x-full');
+        toast.style.transform = 'translateX(0)';
     }, 100);
     
     setTimeout(() => {
-        toast.classList.add('translate-x-full');
+        toast.style.transform = 'translateX(100%)';
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 4000);
 }
 
 // Intersection Observer for Animations
