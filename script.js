@@ -3,13 +3,59 @@
 
 'use strict';
 
+// Global Modal Functions - Accessible from HTML onclick
+function showContactModal() {
+    console.log('Opening contact modal...');
+    const modal = document.getElementById('contactModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        
+        // Add event listener for ESC key
+        document.addEventListener('keydown', handleEscKey);
+        
+        // Add click outside listener
+        modal.addEventListener('click', handleOutsideClick);
+    } else {
+        console.error('Contact modal element not found');
+    }
+}
+
+function closeContactModal() {
+    console.log('Closing contact modal...');
+    const modal = document.getElementById('contactModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        
+        // Remove event listeners
+        document.removeEventListener('keydown', handleEscKey);
+        modal.removeEventListener('click', handleOutsideClick);
+    }
+}
+
+function handleEscKey(event) {
+    if (event.key === 'Escape') {
+        closeContactModal();
+    }
+}
+
+function handleOutsideClick(event) {
+    const modalContent = document.querySelector('#contactModal .relative.w-full');
+    if (event.target.closest('.relative.w-full') === null) {
+        closeContactModal();
+    }
+}
+
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Initializing app...');
     initializeApp();
 });
 
 // Main App Initialization
 function initializeApp() {
+    console.log('Initializing components...');
     initMobileMenu();
     initSmoothScrolling();
     initScrollAnimations();
@@ -28,6 +74,20 @@ function initializeApp() {
             initParallaxEffects();
         }
     }, 100);
+    
+    // Add direct event listeners for contact buttons
+    console.log('Setting up contact button listeners...');
+    document.querySelectorAll('button, a').forEach(element => {
+        if (element.textContent.toLowerCase().includes('contact') ||
+            element.textContent.toLowerCase().includes('let\'s talk')) {
+            console.log('Found contact button:', element.textContent);
+            element.addEventListener('click', function(e) {
+                console.log('Contact button clicked');
+                e.preventDefault();
+                showContactModal();
+            });
+        }
+    });
 }
 
 // Mobile Menu Functionality
@@ -204,210 +264,119 @@ function initButtonInteractions() {
 
 // Contact Form Handling
 function initContactForms() {
-    // Seleccionar todos los botones y enlaces que deberían abrir el formulario
-    const contactTriggers = document.querySelectorAll('button, a');
+    console.log('Initializing contact forms with EmailJS...');
     
-    contactTriggers.forEach(trigger => {
-        const text = trigger.textContent.trim().toLowerCase();
-        if (text.includes('contact') || 
-            text.includes('contact us') || 
-            text.includes('let\'s talk') || 
-            text.includes('get in touch') ||
-            text.includes('solicitar demo') || 
-            text.includes('agendar reunión') || 
-            text.includes('explore projects')) {
-            
-            trigger.addEventListener('click', function(e) {
-                e.preventDefault();
-                showContactModal();
-            });
-        }
-    });
+    // Initialize EmailJS con tu Public Key
+    emailjs.init("7OkgewNpdc12kaUYJ"); 
     
-    // Email links
-    const emailLinks = document.querySelectorAll('a[href^="mailto:"]');
-    emailLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            // Track email click
-            trackEvent('email_click', {
-                email: this.getAttribute('href').replace('mailto:', ''),
-                source: 'landing_page'
-            });
-        });
-    });
-}
-
-// Contact Modal Implementation
-function showContactModal() {
-    console.log('Opening contact modal...');
-    
-    // Remove existing modal if any
-    const existingModal = document.querySelector('.fixed.inset-0');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    // Create enhanced modal with premium design
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 opacity-0 transition-all duration-300';
-    modal.innerHTML = `
-        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform scale-95 transition-all duration-300">
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-light text-slate-900 mb-2 tracking-tight">Let's talk about your project</h3>
-                <p class="text-slate-600 font-light">Tell us your vision and let's create something exceptional together</p>
-            </div>
-            
-            <form id="contact-form" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Full name</label>
-                    <input type="text" name="name" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-light">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Professional email</label>
-                    <input type="email" name="email" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-light">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Company</label>
-                    <input type="text" name="company" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-light">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Tell us about your project</label>
-                    <textarea name="message" rows="4" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-light resize-none"></textarea>
-                </div>
-                
-                <!-- Formspree honeypot field -->
-                <input type="text" name="_gotcha" style="display:none">
-                
-                <p class="text-xs text-slate-500 text-center mt-4">
-                    By submitting, you consent to us contacting you about our services.
-                </p>
-                
-                <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="closeContactModal()" class="flex-1 px-6 py-3 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-all duration-200 font-light">
-                        Cancel
-                    </button>
-                    <button type="submit" class="flex-1 px-6 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all duration-200 font-medium">
-                        Send message
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Animate in
-    requestAnimationFrame(() => {
-        modal.style.opacity = '1';
-        const modalContent = modal.querySelector('.bg-white');
-        if (modalContent) {
-            modalContent.style.transform = 'scale(1)';
-        }
-    });
-    
-    // Handle form submission
-    const form = modal.querySelector('#contact-form');
+    const form = document.getElementById('contactForm');
     if (form) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const button = form.querySelector('button[type="submit"]');
-            const originalText = button.textContent;
-            button.textContent = 'Sending...';
-            button.disabled = true;
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
             
-            // Get form data
-            const formData = new FormData(form);
-            
-            // Send to Formspree with better error handling
-            fetch('https://formspree.io/f/mrgrlpqn', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                console.log('Response headers:', Object.fromEntries([...response.headers]));
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    return response.json().then(err => {
-                        console.error('Server error response:', err);
-                        throw err;
+            try {
+                submitButton.innerHTML = '<span>Enviando...</span>';
+                submitButton.disabled = true;
+                
+                // Collect form data - solo name, email, message
+                const formData = new FormData(form);
+                const templateParams = {
+                    from_name: formData.get('name'),
+                    from_email: formData.get('email'),
+                    message: formData.get('message'),
+                    reply_to: formData.get('email')
+                };
+                
+                console.log('Enviando con EmailJS...');
+                
+                // Try EmailJS first (nunca va a spam)
+                try {
+                    const result = await emailjs.send(
+                        'service_d04gh6i',  // Tu Service ID
+                        'template_qiy0cei', // Tu Template ID
+                        templateParams
+                    );
+                    
+                    console.log('EmailJS exitoso:', result);
+                    showSuccessMessage('¡Mensaje enviado exitosamente! Te contactaremos pronto.');
+                    form.reset();
+                    closeContactModal();
+                    
+                    // Track successful submission
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'form_submit', {
+                            event_category: 'engagement',
+                            event_label: 'contact_form_emailjs'
+                        });
+                    }
+                    
+                } catch (emailjsError) {
+                    console.log('EmailJS falló, usando Formspree como fallback...', emailjsError);
+                    
+                    // Fallback to Formspree
+                    const formspreeData = new FormData(form);
+                    
+                    // Enhanced subject line
+                    const name = formData.get('name');
+                    let subject = `🚀 New Lead: ${name} - Creative Soft AI`;
+                    
+                    formspreeData.set('_subject', subject);
+                    formspreeData.append('_timestamp', new Date().toISOString());
+                    
+                    const response = await fetch('https://formspree.io/f/mrgrlpqn', {
+                        method: 'POST',
+                        body: formspreeData,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
                     });
+                    
+                    if (response.ok) {
+                        showSuccessMessage('¡Mensaje enviado exitosamente! Te contactaremos pronto.');
+                        form.reset();
+                        closeContactModal();
+                        
+                        if (typeof gtag !== 'undefined') {
+                            gtag('event', 'form_submit', {
+                                event_category: 'engagement',
+                                event_label: 'contact_form_formspree'
+                            });
+                        }
+                    } else {
+                        throw new Error('Error al enviar el mensaje');
+                    }
                 }
-            })
-            .then(data => {
-                console.log('Success:', data);
-                closeContactModal();
-                showSuccessMessage();
-            })
-            .catch(error => {
-                console.error('Error details:', error);
-                showErrorMessage();
-                button.textContent = originalText;
-                button.disabled = false;
-            });
+                
+            } catch (error) {
+                console.error('Error en el formulario:', error);
+                showErrorMessage('Error al enviar el mensaje. Por favor intenta nuevamente.');
+            } finally {
+                submitButton.innerHTML = originalButtonText;
+                submitButton.disabled = false;
+            }
         });
-    }
-    
-    // Close on backdrop click
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeContactModal();
-        }
-    });
-    
-    // Close on escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeContactModal();
-        }
-    });
-    
-    // Focus first input
-    setTimeout(() => {
-        const firstInput = modal.querySelector('input[name="name"]');
-        if (firstInput) {
-            firstInput.focus();
-        }
-    }, 300);
-    
-    console.log('Contact modal opened successfully');
-}
-
-function closeContactModal() {
-    const modal = document.querySelector('.fixed.inset-0');
-    if (modal) {
-        modal.style.opacity = '0';
-        modal.querySelector('.bg-white').style.transform = 'scale(0.95)';
-        setTimeout(() => modal.remove(), 300);
+    } else {
+        console.error('Contact form element not found');
     }
 }
 
-function showSuccessMessage() {
+// Success Message
+function showSuccessMessage(message) {
     const toast = document.createElement('div');
-    toast.className = 'fixed top-6 right-6 bg-white border border-slate-200 text-slate-900 px-6 py-4 rounded-2xl shadow-2xl z-50 transform translate-x-full transition-all duration-300';
+    toast.className = 'fixed top-6 right-6 bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-2xl shadow-2xl z-50 transform translate-x-full transition-all duration-300 max-w-md';
     toast.innerHTML = `
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
             </div>
             <div>
-                <div class="font-medium text-sm">Message sent!</div>
-                <div class="text-slate-600 text-xs">We will contact you soon</div>
+                <div class="font-medium text-sm">¡Éxito!</div>
+                <div class="text-green-700 text-xs">${message}</div>
             </div>
         </div>
     `;
@@ -421,22 +390,23 @@ function showSuccessMessage() {
     setTimeout(() => {
         toast.style.transform = 'translateX(100%)';
         setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    }, 5000);
 }
 
-function showErrorMessage() {
+// Error Message
+function showErrorMessage(message) {
     const toast = document.createElement('div');
-    toast.className = 'fixed top-6 right-6 bg-white border border-red-200 text-slate-900 px-6 py-4 rounded-2xl shadow-2xl z-50 transform translate-x-full transition-all duration-300';
+    toast.className = 'fixed top-6 right-6 bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-2xl shadow-2xl z-50 transform translate-x-full transition-all duration-300 max-w-md';
     toast.innerHTML = `
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </div>
             <div>
-                <div class="font-medium text-sm">Error sending message</div>
-                <div class="text-slate-600 text-xs">Please check your connection and try again. If the problem persists, you can email us directly.</div>
+                <div class="font-medium text-sm">Error</div>
+                <div class="text-red-700 text-xs">${message}</div>
             </div>
         </div>
     `;
@@ -450,7 +420,7 @@ function showErrorMessage() {
     setTimeout(() => {
         toast.style.transform = 'translateX(100%)';
         setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    }, 5000);
 }
 
 // Intersection Observer for Animations
@@ -696,8 +666,6 @@ function initEnhancedScrollReveal() {
     });
 }
 
-
-
 // Initialize enhanced scroll reveal
 setTimeout(() => {
     initEnhancedScrollReveal();
@@ -749,8 +717,8 @@ function initMobileOptimizations() {
             document.body.style.width = '100%';
         };
         
-        const originalCloseModal = closePremiumContactModal;
-        closePremiumContactModal = function() {
+        const originalCloseModal = closeContactModal;
+        closeContactModal = function() {
             originalCloseModal();
             // Restore body scroll
             document.body.style.overflow = '';
