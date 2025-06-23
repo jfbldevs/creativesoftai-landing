@@ -726,16 +726,7 @@
                 
                 <!-- Contact Form -->
                 <form id="contactForm" method="POST" class="space-y-4 md:space-y-6">
-                    <!-- Enhanced anti-spam fields -->
-                    <input type="hidden" name="_next" value="https://creativesoftai.com/thank-you">
-                    <input type="hidden" name="_language" value="es">
-                    <input type="hidden" name="_cc" value="">
-                    <input type="hidden" name="_template" value="box">
-                    
-                    <!-- Honeypot field (hidden from users, helps prevent spam) -->
-                    <input type="text" name="_gotcha" style="display:none !important;" tabindex="-1" autocomplete="off">
-                    
-                    <!-- Real honeypot with different name -->
+                    <!-- Honeypot field for spam protection -->
                     <div style="position: absolute; left: -5000px;" aria-hidden="true">
                         <input type="text" name="website" tabindex="-1" autocomplete="off">
                     </div>

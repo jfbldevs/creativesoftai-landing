@@ -264,13 +264,15 @@ function initButtonInteractions() {
 
 // Contact Form Handling
 function initContactForms() {
-    console.log('Initializing contact forms with EmailJS...');
+    console.log('Initializing contact form with EmailJS...');
     
-    // Initialize EmailJS con tu Public Key
+    // Initialize EmailJS with your Public Key
     emailjs.init("7OkgewNpdc12kaUYJ"); 
     
     const form = document.getElementById('contactForm');
     if (form) {
+
+        
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -281,73 +283,53 @@ function initContactForms() {
                 submitButton.innerHTML = '<span>Enviando...</span>';
                 submitButton.disabled = true;
                 
-                // Collect form data - solo name, email, message
+                // Collect form data
                 const formData = new FormData(form);
+                const userName = formData.get('name');
+                const userEmail = formData.get('email');
+                const userMessage = formData.get('message');
+                
                 const templateParams = {
-                    from_name: formData.get('name'),
-                    from_email: formData.get('email'),
-                    message: formData.get('message'),
-                    reply_to: formData.get('email')
+                    title: `Nuevo contacto de ${userName}`,
+                    name: `${userName} (${userEmail})`,
+                    email: userEmail,
+                    time: new Date().toLocaleString('es-ES'),
+                    message: `📧 EMAIL PARA RESPONDER: ${userEmail}
+
+💬 MENSAJE:
+${userMessage}
+
+---
+📅 Fecha: ${new Date().toLocaleString('es-ES')}
+🌐 Sitio: Creative Soft AI`
                 };
                 
-                console.log('Enviando con EmailJS...');
+                console.log('=== ENVIANDO FORMULARIO ===');
+                console.log('Nombre usuario:', userName);
+                console.log('Email usuario:', userEmail);
+                console.log('Mensaje usuario:', userMessage);
+                console.log('Template params completos:', templateParams);
+                console.log('Service ID:', 'service_d04gh6i');
+                console.log('Template ID:', 'template_qiy0cei');
                 
-                // Try EmailJS first (nunca va a spam)
-                try {
-                    const result = await emailjs.send(
-                        'service_d04gh6i',  // Tu Service ID
-                        'template_qiy0cei', // Tu Template ID
-                        templateParams
-                    );
-                    
-                    console.log('EmailJS exitoso:', result);
-                    showSuccessMessage('¡Mensaje enviado exitosamente! Te contactaremos pronto.');
-                    form.reset();
-                    closeContactModal();
-                    
-                    // Track successful submission
-                    if (typeof gtag !== 'undefined') {
-                        gtag('event', 'form_submit', {
-                            event_category: 'engagement',
-                            event_label: 'contact_form_emailjs'
-                        });
-                    }
-                    
-                } catch (emailjsError) {
-                    console.log('EmailJS falló, usando Formspree como fallback...', emailjsError);
-                    
-                    // Fallback to Formspree
-                    const formspreeData = new FormData(form);
-                    
-                    // Enhanced subject line
-                    const name = formData.get('name');
-                    let subject = `🚀 New Lead: ${name} - Creative Soft AI`;
-                    
-                    formspreeData.set('_subject', subject);
-                    formspreeData.append('_timestamp', new Date().toISOString());
-                    
-                    const response = await fetch('https://formspree.io/f/mrgrlpqn', {
-                        method: 'POST',
-                        body: formspreeData,
-                        headers: {
-                            'Accept': 'application/json'
-                        }
+                // Send with EmailJS
+                const result = await emailjs.send(
+                    'service_d04gh6i',  // Tu Service ID
+                    'template_qiy0cei', // Tu Template ID
+                    templateParams
+                );
+                
+                console.log('EmailJS exitoso:', result);
+                showSuccessMessage('¡Mensaje enviado exitosamente! Te contactaremos pronto.');
+                form.reset();
+                closeContactModal();
+                
+                // Track successful submission
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'form_submit', {
+                        event_category: 'engagement',
+                        event_label: 'contact_form_emailjs'
                     });
-                    
-                    if (response.ok) {
-                        showSuccessMessage('¡Mensaje enviado exitosamente! Te contactaremos pronto.');
-                        form.reset();
-                        closeContactModal();
-                        
-                        if (typeof gtag !== 'undefined') {
-                            gtag('event', 'form_submit', {
-                                event_category: 'engagement',
-                                event_label: 'contact_form_formspree'
-                            });
-                        }
-                    } else {
-                        throw new Error('Error al enviar el mensaje');
-                    }
                 }
                 
             } catch (error) {
